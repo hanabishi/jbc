@@ -1,0 +1,285 @@
+.avg {
+     font-family: georgia, serif;
+     font-style: italic;
+     text-decoration: overline;
+}
+.commitedFile
+{
+}
+
+
+.dbcCategoryMegaSelectable{
+    color: white;
+    font-weight: 300;
+    font-size: 1.5em;
+    margin: .3em 0 .1em 0;
+	text-align: center;
+    background-color: #00297A;
+    -webkit-border-top-left-radius: 8px;
+	-webkit-border-top-right-radius: 8px;
+	-moz-border-radius-topleft: 8px;
+	-moz-border-radius-topright: 8px;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+	border-radius:8px 8px 0 0;
+}
+
+.dbcCategoryMegaSelected{
+    color: white;
+    font-weight: 300;
+    font-size: 1.5em;
+    margin: .3em 0 .1em 0;
+	text-align: center;
+    background-color: #4D70B8;
+    -webkit-border-top-left-radius: 8px;
+	-webkit-border-top-right-radius: 8px;
+	-moz-border-radius-topleft: 8px;
+	-moz-border-radius-topright: 8px;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+	border-radius:8px 8px 0 0;
+}
+.dbcCategoryMegaSelectable:hover{
+    background-color: #4D70B8;
+}
+.dbcCategoryMegaSelected:hover{
+    background-color: #4D70B8;
+}
+
+.dbcCategorySelectable{
+    color: white;
+    font-weight: 300;
+    margin: .3em 0 .1em 0;
+	text-align: center;
+    background-color: #00297A;
+    -webkit-border-top-left-radius: 8px;
+	-webkit-border-top-right-radius: 8px;
+	-moz-border-radius-topleft: 8px;
+	-moz-border-radius-topright: 8px;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+	border-radius:8px 8px 0 0;
+}
+
+.dbcCategorySelected{
+    color: white;
+    font-weight: 300;
+    margin: .3em 0 .1em 0;
+	text-align: center;
+    background-color: #4D70B8;
+    -webkit-border-top-left-radius: 8px;
+	-webkit-border-top-right-radius: 8px;
+	-moz-border-radius-topleft: 8px;
+	-moz-border-radius-topright: 8px;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+	border-radius:8px 8px 0 0;
+}
+.dbcCategorySelectable:hover{
+    background-color: #4D70B8;
+}
+.dbcCategorySelected:hover{
+    background-color: #4D70B8;
+}
+
+.categorySection{
+}
+.dbcErrorFeedback
+{
+	color: red;
+}
+.dbcFeedback
+{
+	color: black;
+}
+.fileError
+{
+    color: red;
+    font-weight: bold;
+}
+.commitCommentTitel
+{
+    font-weight: bold;
+}
+.commitCommentDescription
+{
+}
+.commitCommentBlockTr
+{
+    border: 1px solid #CCB;
+    background: #EED;
+    padding: 4px;
+    white-space: normal;
+}
+.commitCommentBlockTd
+{
+    padding: 4px 4px 3px 4px;
+    vertical-align: top;
+}
+.listInfoHeader
+{
+    color: black;
+}
+.listWarningsHeader
+{
+    color: orange;
+}
+.listErrorsHeader
+{
+    color: red;
+}
+.listInfo
+{
+    color: black;
+}
+.listWarnings
+{
+    color: orange;
+}
+.listErrors
+{
+    color: red;
+}
+.bulletSuccess
+{
+    color: green;
+}
+.bulletDebug
+{
+    color: grey;
+}
+.bulletInfo
+{
+    color: black;
+}
+.bulletWarnings
+{
+    color: orange;
+}
+.bulletErrors
+{
+    color: red;
+}
+.summaryErrors
+{
+    color: red;
+    font-weight: bold;
+}
+.summaryWarnings
+{
+    color: orange;
+    font-weight: bold;
+}
+.summarySuccess
+{
+    color: green;
+    font-weight: bold;
+}
+.summaryInfo
+{
+    color: blue;
+    font-weight: bold;
+}
+.pluginHeader
+{
+    font-weight: bold;
+    color: black;
+    display: block;
+    font-size: 1.5em;
+    -webkit-margin-before: 0.83em;
+    -webkit-margin-after: 0.83em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+}
+.tableHeaderProduct
+{
+    color: black;
+    font-weight: bold;
+}
+.tableHeaderInfo
+{
+    color: black;
+    font-weight: bold;
+}
+.tableHeaderErrors
+{
+    color: red;
+    font-weight: bold;
+}
+.tableHeaderWarnings
+{
+    color: orange;
+    font-weight: bold;
+}
+.cleanMessage
+{
+}
+.buildMessage
+{
+}
+.buildMessageProject
+{
+    color: green;
+}
+.buildMessageWarning
+{
+    color: blue;
+}
+.buildMessageError
+{
+    color: red;
+}
+.promoteFailedCommand
+{
+    color: red;
+    font-size: small;
+    font-face: verdana;
+    font-weight: italic, bold;
+}
+.promoteSucceededCommand
+{
+    color: blue;
+    font-size: small;
+    font-face: verdana;
+    font-weight: italic, bold;
+}
+.promoteHeaderFailed
+{
+    font-face: verdana;
+    color: red;
+    font-weight: bold;
+}
+.promoteHeaderSucceeded
+{
+    font-face: verdana;
+    color: green;
+    font-weight: bold;
+}
+.promoteHeaderInfo
+{
+    color: blue;
+    font-weight: bold;
+}
+
+
+
+/* Fit report*/
+div#fit-log-root .pass {background-color: #AAFFAA;}
+div#fit-log-root .fail {background-color: #FFAAAA;}
+div#fit-log-root .error {
+  /* Override Jenkins error class for everything under fit-log-root */
+  background-color: #FFFFCC;
+  color: black;
+  background-image: none;
+  padding-left: .5em;          
+}
+div#fit-log-root .ignore {background-color: #CCCCCC;}
+div#fit-log-root .fit_stacktrace {
+  font-family: Monaco, 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Lucida Console', monospace;
+  font-weight: normal;
+  line-height: 130%;
+}
+div#fit-log-root .fit_label {font-style: italic; color: #C08080;}
+div#fit-log-root .fit_grey {color: #808080;}
+div#fit-log-root .fit_extension {border: solid 1px grey;}
+div#fit-log-root .fit_table {border: solid 1px grey; border-collapse: collapse; margin: 2px 0px;}

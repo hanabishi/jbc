@@ -1,0 +1,577 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <l:layout title="Dashboard Manager">
+     <l:header>
+        <script type="text/javascript" src="${rootURL}/plugin/dbm/js/jquery-2.1.1.min.js"></script>
+        <link href="${rootURL}/plugin/dbm/css/dbm.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="${rootURL}/plugin/dbm/js/dbm.js"></script>
+        <script type="text/javascript" src="${rootURL}/plugin/dbm/js/jquery.blockUI.js"></script>
+        <st:bind var="dbManager" value="${it}"/>
+        <script>
+        	function cleanFeedback(){
+        		document.getElementById("feedback").innerHTML = "";
+        	}
+
+        	function displayDBMFeedback(isError, feedback){
+        		if(feedback == ""){
+        			document.getElementById("dbmFeedback").innerHTML ="";
+        			return;
+        		}
+        		document.getElementById("dbmFeedback").style=(isError)?"dbcErrorFeedback":"dbcFeedback";
+        		icon = (isError)?'<img src="${rootURL}/plugin/RepositoryPlugin/images/replacementIcons/16x16/red.png"/>':'<img src="${rootURL}/plugin/RepositoryPlugin/images/replacementIcons/16x16/blue.png"/>';
+        		document.getElementById("dbmFeedback").innerHTML = icon + feedback+"<br /><br />";
+        	}
+
+        	
+        	function displayFeedback(isError, feedback){
+        		document.getElementById("feedback").style=(isError)?"dbcErrorFeedback":"dbcFeedback";
+        		icon = (isError)?'<img src="${rootURL}/plugin/RepositoryPlugin/images/replacementIcons/16x16/red.png"/>':'<img src="${rootURL}/plugin/RepositoryPlugin/images/replacementIcons/16x16/blue.png"/>';
+        		document.getElementById("feedback").innerHTML = icon + feedback+"<br /><br />";
+        	}
+			
+        	function getName(){
+        		url = document.getElementById("txtSVNUrl").value;
+        		return (url.lastIndexOf("/") > 1) ?url.substring(url.lastIndexOf("/")+1) :""
+        	}
+        	
+        	function updateBranchName(){
+        		document.getElementById("txtBranchName").value = getName();
+        	}
+
+        	function createDashboard(){
+        		cleanFeedback();
+        		console.log("CREATE");
+        		
+        		builds = [];
+        		svnUrl = document.getElementById("txtSVNUrl").value;
+        		allBuilds = document.getElementsByName("buildSelection");
+        		branchName = document.getElementById("txtBranchName").value;
+        		startTime = document.getElementById("txtStartTime").value;
+        		includeHardware = document.getElementById("chkIncludeHardware").checked;
+        		nextBuildNumber = parseInt(document.getElementById("txtStartNumber").value);
+        		days = document.getElementById("selLifespan").options[document.getElementById("selLifespan").selectedIndex].value
+        		if(svnUrl == ""){
+        			displayFeedback(true, "You need to enter a URL");
+        			return;
+        		}
+
+        		if(branchName == ""){
+        			displayFeedback(true, "You need to enter a name for the dashboard");
+        			return;
+        		}
+        		if(startTime == ""){
+        			displayFeedback(true, "You need to enter a start time");
+        			return;
+        		}
+        		if(nextBuildNumber == ""){
+        			displayFeedback(true, "You need to enter the next build number");
+        			return;
+        		}
+
+				configuration = "";
+        		for(index in allBuilds){
+        			if(allBuilds[index].checked){
+        			configuration +=allBuilds[index].value+";"
+        			}
+        		}
+
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Creating projects</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+            	dbManager.createDashboard(svnUrl, branchName, days, startTime, nextBuildNumber, document.getElementById("chkAddSystemBuild").checked, includeHardware, configuration, function(t) {
+            		displayFeedback(t.responseObject().code != 0, t.responseObject().message);
+            		if(t.responseObject().code == 0){
+            			clearBuilds();
+            			buildsToCreate.innerHTML = "";
+            		}
+            		$.unblockUI();
+            		updateDBList();
+            	});
+        	}
+
+			function getSelectedProjects(){
+			    configuration = "";
+			    allProjects = document.getElementsByName("chkProjects");
+        		for(index in allProjects){
+        			if(allProjects[index].checked){
+        				configuration += allProjects[index].value+";"
+        			}
+        		}
+        		return configuration;
+			}
+
+			function getSelectedViews(){
+			    configuration = "";
+			    allProjects = document.getElementsByName("chkViews");
+        		for(index in allProjects){
+        			if(allProjects[index].checked){
+        				configuration += allProjects[index].value+";"
+        			}
+        		}
+        		return configuration;
+			}
+			
+			function toggleProjects(checked){
+			    allProjects = document.getElementsByName("chkProjects");
+        		for(index in allProjects){
+        			allProjects[index].checked = checked;
+        		}
+			}
+			function toggleViews(checked){
+			    allProjects = document.getElementsByName("chkViews");
+        		for(index in allProjects){
+        			allProjects[index].checked = checked;
+        		}
+			}
+        	
+        	function deleteProjects(){
+        		if(!confirm("Are you sure you want to delete the marked builds and views?")){
+        			return;
+        		}
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Removing projects</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+			    
+			    viewList = getSelectedViews();
+            	dbManager.deleteBuilds(getSelectedProjects(), viewList, function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+            		$.unblockUI();
+            		
+            		if(viewList != ""){
+            			updateDBList();
+        			}
+        			updateBranch();
+            	});
+        	}
+
+        	function cleanProjects(){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Cleaning projects</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+			    
+            	dbManager.cleanBuilds(getSelectedProjects(), function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+            		$.unblockUI();
+            	});
+        	}
+        	
+        	function startProjects(){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Starting projects</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+			    
+            	dbManager.startBuilds(getSelectedProjects(), function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+            		$.unblockUI();
+            	});
+        	}
+        	
+        	function disableProjects(){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Disabling projects</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+			    
+            	dbManager.disableBuilds(getSelectedProjects(), function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+            		$.unblockUI();
+            	});
+        	}
+        	
+        	function enableProjects(){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Enabling projects</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+			    
+            	dbManager.enableBuilds(getSelectedProjects(), function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+            		$.unblockUI();
+            	});
+        	}
+        	    
+        	function clearBuilds(){
+        		for(index in allBuilds){
+        			allBuilds[index].checked = false;
+        		}
+        		document.getElementById("chkAddSystemBuild").checked = false;
+        		document.getElementById("chkIncludeHardware").checked = false;
+        		updateBuildsToCreate();
+        	}
+        	
+        	function toggleCheckbox(id){
+        		document.getElementById(id).checked = !document.getElementById(id).checked
+        		updateBuildsToCreate();
+        	}
+          	
+          	function updateQueue(){
+          		dbManager.getQueue(function(t) {
+                	document.getElementById("queue").innerHTML=t.responseObject();
+      			}); 
+          	}
+
+          	function toggleSection(sectionName){
+				console.log("TOGGLE: " + sectionName);          	
+          		allSections = document.getElementsByName("categorySection");
+          		for(index in allSections){
+					if(allSections[index].style != null) {
+          				allSections[index].style.display = "None";
+          				
+      				}
+          		}
+
+          		document.getElementById(sectionName).style.display="";
+
+          		allSections = document.getElementsByName("categoryHeader");
+          		for(index in allSections){
+          			if(allSections[index].style != null) {
+          				allSections[index].setAttribute("class", "dbcCategorySelectable");
+      				}
+          		}
+          		
+          		console.log(document.getElementById("header"+sectionName));
+          		document.getElementById("header"+sectionName).setAttribute("class", "dbcCategorySelected");
+          		console.log(document.getElementById("header"+sectionName));
+          	}
+          	
+          	function toggleMegaSection(sectionName){
+				console.log("TOGGLE: " + sectionName);          	
+          		allSections = document.getElementsByName("categoryMegaSection");
+          		for(index in allSections){
+					if(allSections[index].style != null) {
+          				allSections[index].style.display = "None";
+      				}
+          		}
+
+          		document.getElementById(sectionName).style.display="";
+
+          		allSections = document.getElementsByName("categoryMegaHeader");
+          		for(index in allSections){
+          			if(allSections[index].style != null) {
+          				allSections[index].setAttribute("class", "dbcCategoryMegaSelectable");
+      				}
+          		}
+          		document.getElementById("header"+sectionName).setAttribute("class", "dbcCategoryMegaSelected");
+          	}
+          	
+
+          	function updateDBList(){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Updating DB list</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+            	dbManager.getDashboards(function(t) {
+            		document.getElementById("dbmanager").innerHTML = t.responseObject();
+            		$.unblockUI(); 
+            	});
+          	}
+
+          	function updateTemplates(){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Updating templates</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+            	dbManager.getProjectsWithUpdate(function(t) {
+            		document.getElementById("projectList").innerHTML = t.responseObject();
+            		$.unblockUI(); 
+            	});
+          	}
+          	    
+			function updateBranch(){
+				displayDBMFeedback(0,"");
+				name = document.getElementById("selBranchManger").options[document.getElementById("selBranchManger").selectedIndex].value
+				if(name != ""){
+            		dbManager.getProjectsDiv(name, function(t) {
+	            		document.getElementById("deleteDiv").innerHTML = t.responseObject();
+			    	});
+		    	}else{
+		    		document.getElementById("dbmFeedback").innerHTML = "";
+		    		document.getElementById("deleteDiv").innerHTML = "";
+		    	}
+			}
+			
+          	function disableDashboard(name){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Disabling builds</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });
+            	dbManager.disableBuilds(name, function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+				    $.unblockUI();
+			    });        	
+          	}
+          	function enableDashboard(name){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Enabling builds</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });  
+            	dbManager.enableBuilds(name, function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+				    $.unblockUI();
+			    });        	
+          	}  
+          	
+          	function cleanDashboard(name){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Cleaning builds</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });  
+            	dbManager.cleanBuilds(name, function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+				    $.unblockUI();
+		    	});          	
+		    }
+		    
+          	function startDashboard(name){
+			    $.blockUI({
+			        message: '<img src="${rootURL}/plugin/RepositoryPlugin/images/ajax-loader.gif"/> <span style="font-size:40px">Starting builds</span>',
+			        css: {
+			            border: 'none',
+			            padding: '15px',
+			            backgroundColor: '#000',
+			            '-webkit-border-radius': '10px',
+			            '-moz-border-radius': '10px',
+			            opacity: .5,
+			            color: '#fff'
+			        }
+			    });  
+            	dbManager.startBuilds(name, function(t) {
+            		displayDBMFeedback(t.responseObject().code != 0, t.responseObject().message);
+				    $.unblockUI();
+			    });
+          	}
+          	
+      		function updateBuildsToCreate() {
+          		console.log("UPDATE");
+          		allBuilds = document.getElementsByName("buildSelection");
+          		buildsToCreate = document.getElementById("buildsToCreate");
+          		html = "<b>Projects to create</b><br />";
+          		if(document.getElementById("chkAddSystemBuild").checked){
+          			html += "System-Build<br />";
+          		}
+          		for(index in allBuilds){
+          			if(allBuilds[index].checked){
+          				html += allBuilds[index].value.replace('/','-') + "<br />";
+          			}
+          		}
+          		console.log(html);
+          		buildsToCreate.innerHTML = html;
+          	}
+          	
+          	function setTemplateBuilds(checkedStatus){
+          		console.log("TEMPLATE");
+          		configurations = document.getElementById("selTemplates").options[document.getElementById("selTemplates").selectedIndex].value;
+          		systembuild = document.getElementById("selTemplates").options[document.getElementById("selTemplates").selectedIndex].getAttribute("systembuild")=="true";
+          		projects = configurations.split(";");
+          		allBuilds = document.getElementsByName("buildSelection");
+        		for(index in allBuilds){
+        			for(pindex in projects) {
+        				if(allBuilds[index].value == projects[pindex]){
+        					allBuilds[index].checked=checkedStatus;
+        				}
+    				}
+        		}
+        		document.getElementById("chkAddSystemBuild").checked = (systembuild)?checkedStatus:false;        		
+        		updateBuildsToCreate();
+          	}
+          	
+          	function selectTemplateBuilds(){
+          		setTemplateBuilds(true);
+          	}
+          	
+          	function deselectTemplateBuilds(){
+          		setTemplateBuilds(false);
+          	}
+          	
+          	<j:if test="${it.isAdmin()}">
+	          	$(document).ready(function() {
+	         		updateDBList();
+				});
+			</j:if>
+        </script>
+     </l:header>
+     <l:side-panel>
+        <st:include page="sidepanel.jelly" it="${it.getRootView()}" />
+     </l:side-panel>
+     <l:main-panel>
+	     <j:if test="${it.isAdmin()}">
+	         <table width="100%">
+	        	<tr>
+	        	<td name="categoryMegaHeader" id="headerDBC" onclick="toggleMegaSection('DBC')" class="dbcCategoryMegaSelected" width="33%" onmouseover="set_mouse_pointer(this)">Create</td>
+	        	<td name="categoryMegaHeader" id="headerDBM" onclick="toggleMegaSection('DBM')" class="dbcCategoryMegaSelectable" width="33%" onmouseover="set_mouse_pointer(this)">Manage</td>
+	        	<td name="categoryMegaHeader" id="headerDBS" onclick="toggleMegaSection('DBS')" class="dbcCategoryMegaSelectable" width="34%" onmouseover="set_mouse_pointer(this)">Setup</td>
+	        	</tr>
+	    	 </table>
+		     <table width="100%" name="categoryMegaSection" id="DBC">
+		     	<tr>
+		     		<td colspan="4" class="tableHeaderInfo">Branch configuration</td>
+		     	</tr>
+		     	<tr>
+		     		<td>SVN Url:</td>
+		     		<td><input type="text" id="txtSVNUrl" size="40" onkeyup="updateBranchName()" value="sbo/branches/"/> <img src="${it.getRootURL()}/images/16x16/help.png" onmouseover="set_mouse_pointer(this)" onclick="displayFeedback(false, 'Relative to the SVN root')"/></td>
+		     		<td>Branch Name:</td>
+		     		<td><input type="text" id="txtBranchName" size="20"/></td>
+		     	</tr>
+				<tr>
+					<td colspan="4" class="tableHeaderInfo">Build configuration</td>
+				</tr>
+				<tr>
+					<td>Start time:</td>
+					<td><input type="text" id="txtStartTime" value="" size="10"/><img src="${it.getRootURL()}/images/16x16/help.png" onmouseover="set_mouse_pointer(this)" onclick="displayFeedback(false, 'Valid format is 24h clock and HH:MM')"/></td>
+		     		<td colspan="2">Logs life span: 
+		                <select id="selLifespan">
+		                	<option value="1">1 day</option>
+		                	<option value="7">7 days</option>
+		                	<option value="14" selected="true">14 days</option>
+		                	<option value="30">30 days</option>
+		                </select> <img src="${it.getRootURL()}/images/16x16/help.png" onmouseover="set_mouse_pointer(this)" onclick="displayFeedback(false, 'Days before Jenkins remove the logs')"/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" class="tableHeaderInfo">Template Configurations</td>
+				</tr>
+				<tr>
+					<td>Templates:</td>
+					<td><div id="templateSelect">${it.getConfigurations()}</div></td>
+					<td colspan="2">
+						<button id="btnSelect" onclick="selectTemplateBuilds()">Select template builds</button> 
+						<button id="btnDeselect" onclick="deselectTemplateBuilds()">Deselect template builds</button>
+						<button id="btnClear" onclick="clearBuilds()">Clear projects</button>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">
+						<div id="projectList">${it.getProjects()}</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" ><button id="btnRevert" onclick="createDashboard()">Create dashboard</button></td>
+				</tr>
+				<tr>
+					<td colspan="4">
+						<div id="feedback"></div>
+						<div id="buildsToCreate"></div>
+					</td>
+				</tr>
+		     </table>
+		     <table width="100%" name="categoryMegaSection" id="DBM" style="display:none">
+		     	<tr>
+		     		<td>
+			     		<button id="btnClean" onclick="cleanProjects()">Clean</button>
+			     		<button id="btnStart" onclick="startProjects()">Start</button>
+			     		<button id="btnEnable" onclick="enableProjects()">Enable</button>
+			     		<button id="btnDisable" onclick="disableProjects()">Disable</button>
+			     		<button id="btnDelete" onclick="deleteProjects()">Delete</button>
+		     		</td>
+		     		<td>
+		     			<button id="btnRevert" onclick="updateTemplates()">Update templates</button>
+					</td>
+		     	</tr>
+		     	<tr>
+		     		<td>
+		     			<div id="dbmanager"></div>
+			     		<div id="deleteDiv"></div>
+		     		</td>
+		     		<td>
+		     			<div id="dbmFeedback"></div>
+		     		</td>
+		     	</tr>
+		     </table>
+     	</j:if>
+     	<j:if test="${!it.isAdmin()}">
+     		<span style="color: red">You need to login to access this page</span>
+     	</j:if>
+ 	</l:main-panel>
+  </l:layout>  
+</j:jelly>
