@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.dbm;
+package org.jenkinsci.plugins.jbm;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -26,10 +26,10 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.dbm.AbstractCategory.JSFeedback;
-import org.jenkinsci.plugins.dbm.TemplateManager.ConfigurationCategory;
-import org.jenkinsci.plugins.dbm.TemplateManager.ConfigurationProject;
-import org.jenkinsci.plugins.dbm.TemplateManager.ConfigurationTemplate;
+import org.jenkinsci.plugins.jbm.AbstractCategory.JSFeedback;
+import org.jenkinsci.plugins.jbm.TemplateManager.ConfigurationCategory;
+import org.jenkinsci.plugins.jbm.TemplateManager.ConfigurationProject;
+import org.jenkinsci.plugins.jbm.TemplateManager.ConfigurationTemplate;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;

@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.dbm;
+package org.jenkinsci.plugins.jbm;
 
 import hudson.FilePath;
 import hudson.model.TaskListener;

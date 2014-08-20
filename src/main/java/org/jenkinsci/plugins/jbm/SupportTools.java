@@ -1,3 +1,4 @@
+package org.jenkinsci.plugins.jbm;
 //package org.jenkinsci.plugins.dbm;
 //
 //import hudson.FilePath;
